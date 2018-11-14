@@ -214,33 +214,28 @@ def all_bombs_flagged?()
     @global_config[:bomb_positions].all?{|pos| @global_config[:flag_positions].any?{|p| p==pos}}
 end
 
+def handle_game_over
+    if @global_config[:game_over]
+        if bomb_found?()
+            puts "Bomb selected.  Game Over."
+        end
+        if all_bombs_flagged?()
+            puts "All bombs found.  You win!"                
+        end
+        exit()
+    end
+end 
+
 # Main app
 def main
-    clear_screen = true
     configure()
     generate_board()
     while true do
-        if clear_screen
-            system("clear")
-            draw_board()
-        else
-            clear_screen = true
-        end
-        if @global_config[:game_over]
-            if bomb_found?()
-                puts "Bomb selected.  Game Over."
-            end
-            if all_bombs_flagged?()
-                puts "All bombs found.  You win!"                
-            end
-            exit()
-        end
+        system("clear")
+        draw_board()
+        handle_game_over if @global_config[:game_over]
         command = get_command()
-        if command_is_valid?(command)
-            clear_screen = false
-            puts "Command is not valid"
-            next
-        end
+        next if command_is_valid?(command)
         handle_command(command)
     end
 end
