@@ -21,7 +21,9 @@ CARDINAL_DIRECTIONS = [[1, 0], [0, -1], [0, 1], [-1, 0]]
     flag_positions: [],
     selected_positions: [],
     uncovered_positions: [],
-    game_over: false
+    game_over: false,
+    start_time: nil,
+    end_time: nil
 }
 
 def invalid_grid_size?(grid_size)
@@ -214,16 +216,31 @@ def all_bombs_flagged?()
     @global_config[:bomb_positions].all?{|pos| @global_config[:flag_positions].any?{|p| p==pos}}
 end
 
+def print_time_played()
+    play = @global_config[:end_time]-@global_config[:start_time]
+    play_time = Time.at(play)
+    puts play_time.strftime("Played for %M:%S")
+end
+
+def print_stats()
+    uncovered_board_size = @global_config[:uncovered_positions].length
+    board_size = @global_config[:grid_size]**2
+    print_time_played()
+    puts "Made #{@global_config[:selected_positions].length} moves"
+    puts "Uncovered #{uncovered_board_size} of #{board_size} (#{((uncovered_board_size.to_f/board_size)*100).round(2)})"
+end
+
 def handle_game_over
-    if @global_config[:game_over]
-        if bomb_found?()
-            puts "Bomb selected.  Game Over."
-        end
-        if all_bombs_flagged?()
-            puts "All bombs found.  You win!"                
-        end
-        exit()
+    @global_config[:end_time] = Time.now()
+    if bomb_found?()
+        puts "Bomb selected.  Game Over."
+        print_stats()
     end
+    if all_bombs_flagged?()
+        puts "All bombs found.  You win!"                
+        print_stats()
+    end
+    exit()
 end 
 
 # Main app
